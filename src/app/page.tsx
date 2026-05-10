@@ -178,10 +178,11 @@ export default function LandingPage() {
     setIsOpen(true);
     setShowParticles(true);
 
-    // Play audio on user interaction
-    if (audioRef.current) {
-      audioRef.current.volume = 0.6;
-      audioRef.current.play().catch(() => {});
+    // Play global audio
+    const audio = document.getElementById("global-bg-music") as HTMLAudioElement;
+    if (audio) {
+      audio.volume = 0.6;
+      audio.play().catch(() => console.log("Audio play blocked by browser"));
     }
 
     // Launch canvas-confetti
@@ -198,20 +199,8 @@ export default function LandingPage() {
     });
 
     setTimeout(() => {
-      confetti({
-        particleCount: 80,
-        angle: 60,
-        spread: 70,
-        origin: { x: 0, y: 0.6 },
-        colors,
-      });
-      confetti({
-        particleCount: 80,
-        angle: 120,
-        spread: 70,
-        origin: { x: 1, y: 0.6 },
-        colors,
-      });
+      confetti({ particleCount: 80, angle: 60, spread: 70, origin: { x: 0, y: 0.6 }, colors });
+      confetti({ particleCount: 80, angle: 120, spread: 70, origin: { x: 1, y: 0.6 }, colors });
     }, 300);
 
     // Navigate after animation

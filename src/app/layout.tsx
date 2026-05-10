@@ -25,7 +25,11 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body bg-cream overflow-x-hidden">{children}</body>
+      <body className="font-body bg-cream overflow-x-hidden">
+        {children}
+        {/* Global Audio: Tidak akan kerestart saat pindah halaman */}
+        <audio id="global-bg-music" src="/mytreasure.mp3" loop preload="auto" />
+      </body>
     </html>
   );
 }
