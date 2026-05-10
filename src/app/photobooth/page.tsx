@@ -32,11 +32,26 @@ function drawFaceFilter(
   ctx: CanvasRenderingContext2D,
   lms: Landmark[],
   frameId: string,
-  w: number,
-  h: number
+  canvasW: number,
+  canvasH: number,
+  videoW = canvasW,
+  videoH = canvasH
 ) {
-  const lx = (i: number) => (1 - lms[i].x) * w;
-  const ly = (i: number) => lms[i].y * h;
+  const videoAspect = videoW / videoH;
+  const canvasAspect = canvasW / canvasH;
+  let renderedW: number, renderedH: number, offX = 0, offY = 0;
+  if (videoAspect > canvasAspect) {
+    renderedH = canvasH;
+    renderedW = canvasH * videoAspect;
+    offX = (renderedW - canvasW) / 2;
+  } else {
+    renderedW = canvasW;
+    renderedH = canvasW / videoAspect;
+    offY = (renderedH - canvasH) / 2;
+  }
+
+  const lx = (i: number) => canvasW - (lms[i].x * renderedW - offX);
+  const ly = (i: number) => lms[i].y * renderedH - offY;
 
   const faceW = Math.abs(lx(LM.L_SIDE) - lx(LM.R_SIDE));
   const eyeCX = (lx(LM.L_EYE_OUT) + lx(LM.R_EYE_OUT)) / 2;
@@ -54,22 +69,18 @@ function drawFaceFilter(
 
   switch (frameId) {
     case "diamond":
-      em("✦", lx(LM.R_CHEEK) - faceW * 0.16, ly(LM.R_CHEEK) + faceW * 0.25, faceW * 0.22, "#FFD700");
-      em("✦", lx(LM.L_CHEEK) + faceW * 0.16, ly(LM.L_CHEEK) + faceW * 0.25, faceW * 0.22, "#FFD700");
+      em("✨", lx(LM.R_CHEEK), ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.20);
+      em("✨", lx(LM.L_CHEEK), ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.20);
       break;
-
     case "blush":
-      em("🌸", lx(LM.R_CHEEK) - faceW * 0.16, ly(LM.R_CHEEK) + faceW * 0.25, faceW * 0.24);
-      em("🌸", lx(LM.L_CHEEK) + faceW * 0.16, ly(LM.L_CHEEK) + faceW * 0.25, faceW * 0.24);
+      em("🌸", lx(LM.R_CHEEK), ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.20);
+      em("🌸", lx(LM.L_CHEEK), ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.20);
       break;
-
     case "gold":
-      em("👑", eyeCX, ly(LM.FOREHEAD) - faceW * 0.50, faceW * 0.50);
+      em("👑", eyeCX, ly(LM.FOREHEAD) - faceW * 0.45, faceW * 0.50);
       break;
-
     case "holo":
-      // Topi ultah, posisi sama kayak mahkota
-      em("🎩", eyeCX, ly(LM.FOREHEAD) - faceW * 0.50, faceW * 0.50);
+      em("🎩", eyeCX, ly(LM.FOREHEAD) - faceW * 0.45, faceW * 0.50);
       break;
   }
 
@@ -240,7 +251,7 @@ export default function PhotoboothPage() {
       const results = faceLandmarkerRef.current?.detectForVideo(video, now);
       if (results?.faceLandmarks?.[0]) {
         lastLandmarksRef.current = results.faceLandmarks[0] as Landmark[];
-        drawFaceFilter(ctx, lastLandmarksRef.current, selectedFrameRef.current.id, rw, rh);
+        drawFaceFilter(ctx, lastLandmarksRef.current, selectedFrameRef.current.id, rw, rh, video.videoWidth, video.videoHeight);
       } else {
         lastLandmarksRef.current = null;
       }
@@ -287,7 +298,7 @@ export default function PhotoboothPage() {
 
       // Draw face filter stickers on saved photo
       if (lastLandmarksRef.current) {
-        drawFaceFilter(ctx, lastLandmarksRef.current, selectedFrame.id, outputW, outputH);
+        drawFaceFilter(ctx, lastLandmarksRef.current, selectedFrame.id, outputW, outputH, video.videoWidth, video.videoHeight);
       }
 
       // Top gradient
