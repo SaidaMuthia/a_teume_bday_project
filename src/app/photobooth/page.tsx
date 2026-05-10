@@ -31,7 +31,7 @@ function PhotoOverlay({ selectedFrame }: { selectedFrame: typeof FRAMES[0] }) {
         <div className="flex items-center justify-between mb-1">
           <DiamondIcon size={18} />
           <p className="font-cute text-white text-[11px] font-bold tracking-[0.2em] uppercase">
-            ✦ TEUME PHOTOBOOTH ✦
+            ✦ PHOTOBOOTH ✦
           </p>
           <DiamondIcon size={18} />
         </div>
@@ -100,7 +100,7 @@ export default function PhotoboothPage() {
       const scaleX = outputW / cW;
       const scaleY = outputH / cH;
 
-      // ========================================================
+// ========================================================
       // MATEMATIKA ANTI-GEPENG MENGGUNAKAN RAW VIDEO
       // ========================================================
       const videoW = video.videoWidth;
@@ -120,9 +120,11 @@ export default function PhotoboothPage() {
       }
 
       ctx.save();
-      // Gambar video mentah yang sudah dipotong. 
-      // Video mentah SECARA ALAMI tidak termirror (seperti dilihat orang lain), 
-      // jadi teks akan terbaca normal tanpa perlu rumus ctx.scale(-1, 1).
+      // MEMBALIK CANVAS HORIZONTAL SEBELUM DRAW IMAGE
+      // Agar hasil jepretan foto sama persis dengan cermin (preview)
+      ctx.translate(outputW, 0);
+      ctx.scale(-1, 1);
+      
       ctx.drawImage(video, sX, sY, sW, sH, 0, 0, outputW, outputH);
       ctx.restore();
       // ========================================================
@@ -273,7 +275,7 @@ export default function PhotoboothPage() {
                 <button onClick={() => {
                   const link = document.createElement("a");
                   link.href = capturedImage;
-                  link.download = `teume-bday-${Date.now()}.jpg`;
+                  link.download = `photobooth-bday-${Date.now()}.jpg`;
                   link.click();
                 }} className="flex-1 flex justify-center items-center gap-2 bg-slate-800 text-white font-cute font-bold py-4 rounded-2xl shadow-md active:scale-95 transition-transform">
                   <Download size={20} /> Save Photo 💾

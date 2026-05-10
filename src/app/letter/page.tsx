@@ -258,7 +258,7 @@ export default function LetterPage() {
           </p>
           <h1 className="font-display text-4xl font-bold shimmer-text">Anggie</h1>
           <p className="font-cute text-blush-400 text-sm">
-            Happy Birthday, darling! 🎂
+            Happy Birthday! 🎂
           </p>
         </motion.div>
 
@@ -276,7 +276,7 @@ export default function LetterPage() {
           <div className="flex-1 h-px bg-gradient-to-l from-transparent to-diamond-200" />
         </motion.div>
 
-        {/* Letter container */}
+{/* Letter container */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -285,16 +285,6 @@ export default function LetterPage() {
         >
           {/* Paper texture accent */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-diamond-300 via-blush-300 to-diamond-300 rounded-t-2xl" />
-
-          {/* Date line */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="font-display text-diamond-300 text-sm italic text-right"
-          >
-            — with all my love 💙
-          </motion.p>
 
           {/* Salutation */}
           <motion.p
@@ -307,36 +297,23 @@ export default function LetterPage() {
           </motion.p>
 
           <LetterParagraph delay={0.1}>
-            On this incredibly special day, I just want to take a moment to remind
-            you how deeply treasured you are — not just by Treasure, but by
-            everyone lucky enough to call you a friend. 💎
+            Barakallah fii umrik, Anggie! Nda terasa sudah lewatmi lagi setahun. I know we’re both living very different lives now, chasing our own dreams on our own paths. But, I just want to take a moment to say how grateful I am to have you in my life.✨
           </LetterParagraph>
 
           <LetterParagraph delay={0.15}>
-            You are the kind of person who lights up a room without even trying.
-            Your laughter is contagious, your kindness is genuine, and your
-            passion — especially for our boys in Treasure 🎶 — is one of the
-            most beautiful things about you. A true Teume through and through.
+            Jujur, memang kita jarang sekali ketemu, mungkin cuma sekali atau dua kali setahun. Chatan pun bukan yang sering sekali. Tapi syukurnya sesibuk apa pun masih selaluji sempat buat catch up heheh.
           </LetterParagraph>
 
           <LetterParagraph delay={0.2}>
-            Like the diamond that represents our fandom, you are multi-faceted,
-            brilliant, and strong. You shine in so many ways, and I hope this
-            year you finally see yourself the way others see you — radiant,
-            worthy, and extraordinary. ✦
+            Walaupun hidup kita sudah beda-beda arahnya, I'm just happy to at least know that you're doing well. I know life gets tough sometimes, tapi berharapka kau tetap ingat kalau kalau kau sehebat dan sekuat itu. You shine in your own way, and I hope this year you see yourself the way I see you—radiant, worthy, and extraordinary.
           </LetterParagraph>
 
           <LetterParagraph delay={0.25}>
-            May this birthday bring you all the things that make your heart
-            flutter — whether that's a new Treasure comeback, the sweetest
-            moments with people you love, or simply a day where the universe
-            feels like it's on your side. 🌟
+            Semoga tahun ini makin bahagia, makin banyak senyumnya, makin kuat hadapin apa pun, dan dilancarin semua urusan serta impianmu. Aamiin. You deserve every bit of happiness. I'm always here to support you.💙
           </LetterParagraph>
 
           <LetterParagraph delay={0.3}>
-            You deserve every good thing coming your way. I hope this year is
-            your most beautiful chapter yet. Happy Birthday, Anggie! Now go
-            celebrate the amazing person you are — you've more than earned it. 🎉
+            Anyway, let's make this year even better than the last one. Enjoy your day!🎉
           </LetterParagraph>
 
           {/* Closing */}
@@ -348,10 +325,10 @@ export default function LetterPage() {
             className="pt-2 space-y-1"
           >
             <p className="font-display text-slate-600 italic text-base">
-              With all the love in the world,
+              With lots of love,
             </p>
             <p className="font-display text-diamond-500 text-xl font-semibold italic">
-              Your best friend 💙
+              — Muthia
             </p>
           </motion.div>
 
@@ -388,9 +365,6 @@ export default function LetterPage() {
               </motion.span>
             ))}
           </div>
-          <p className="font-cute text-diamond-400 text-xs tracking-widest uppercase">
-            TREASURE • TEUME FOREVER • 트레저
-          </p>
         </motion.div>
 
         {/* Back to start button */}
