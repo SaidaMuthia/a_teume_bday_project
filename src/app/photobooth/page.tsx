@@ -140,7 +140,7 @@ export default function PhotoboothPage() {
       ctx.textAlign = "center";
       ctx.fillStyle = "white";
       ctx.font = `bold ${16 * scaleX}px 'Nunito', sans-serif`;
-      ctx.fillText("✦ TEUME PHOTOBOOTH ✦", outputW / 2, 30 * scaleY);
+      ctx.fillText("✦ PHOTOBOOTH ✦", outputW / 2, 30 * scaleY);
       ctx.font = `italic ${24 * scaleX}px 'Playfair Display', serif`;
       ctx.fillText("Happy Birthday, Anggie! 🤍", outputW / 2, 60 * scaleY);
 
