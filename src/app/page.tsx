@@ -184,6 +184,11 @@ export default function LandingPage() {
       audio.volume = 0.6;
       audio.play().catch(() => console.log("Audio play blocked by browser"));
     }
+    
+    if (audioRef.current) {
+      audioRef.current.volume = 0.6;
+      audioRef.current.play().catch(() => {});
+    }
 
     // Launch canvas-confetti
     const confetti = (await import("canvas-confetti")).default;
@@ -320,7 +325,7 @@ export default function LandingPage() {
       </div>
 
       {/* Hidden audio */}
-      <audio ref={audioRef} loop preload="auto">
+      <audio ref={audioRef} loop preload="none">
         <source src="/mytreasure.mp3" type="audio/mpeg" />
       </audio>
     </main>

@@ -54,22 +54,23 @@ function drawFaceFilter(
 
   switch (frameId) {
     case "diamond":
-      em("✦", lx(LM.R_CHEEK), ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.22, "#FFD700");
-      em("✦", lx(LM.L_CHEEK), ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.22, "#FFD700");
+      // Geser ke luar: R_CHEEK (sisi kiri display) dikurangi x, L_CHEEK (sisi kanan) ditambah x
+      em("✨", lx(LM.R_CHEEK) - faceW * 0.08, ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.22, "#FFD700");
+      em("✨", lx(LM.L_CHEEK) + faceW * 0.08, ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.22, "#FFD700");
       break;
 
     case "blush":
-      em("🌸", lx(LM.R_CHEEK), ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.24);
-      em("🌸", lx(LM.L_CHEEK), ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.24);
+      em("🌸", lx(LM.R_CHEEK) - faceW * 0.08, ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.24);
+      em("🌸", lx(LM.L_CHEEK) + faceW * 0.08, ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.24);
       break;
 
     case "gold":
-      em("👑", eyeCX, ly(LM.FOREHEAD) - faceW * 0.38, faceW * 0.40);
+      em("👑", eyeCX, ly(LM.FOREHEAD) - faceW * 0.50, faceW * 0.50);
       break;
 
     case "holo":
-      em("🦋", lx(LM.R_CHEEK), ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.22);
-      em("🦋", lx(LM.L_CHEEK), ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.22);
+      // Topi ultah, posisi sama kayak mahkota
+      em("🎩", eyeCX, ly(LM.FOREHEAD) - faceW * 0.50, faceW * 0.50);
       break;
   }
 
