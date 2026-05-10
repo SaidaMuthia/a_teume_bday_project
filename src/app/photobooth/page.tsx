@@ -69,12 +69,12 @@ function drawFaceFilter(
 
   switch (frameId) {
     case "diamond":
-      em("✨", lx(LM.R_CHEEK), ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.20);
-      em("✨", lx(LM.L_CHEEK), ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.20);
+      em("✨", lx(LM.R_CHEEK) + faceW * 0.08, ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.18);
+      em("✨", lx(LM.L_CHEEK) - faceW * 0.08, ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.18);
       break;
     case "blush":
-      em("🌸", lx(LM.R_CHEEK), ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.20);
-      em("🌸", lx(LM.L_CHEEK), ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.20);
+      em("🌸", lx(LM.R_CHEEK) + faceW * 0.08, ly(LM.R_CHEEK) + faceW * 0.18, faceW * 0.18);
+      em("🌸", lx(LM.L_CHEEK) - faceW * 0.08, ly(LM.L_CHEEK) + faceW * 0.18, faceW * 0.18);
       break;
     case "gold":
       em("👑", eyeCX, ly(LM.FOREHEAD) - faceW * 0.45, faceW * 0.50);
