@@ -24,7 +24,6 @@ function DiamondIcon({ size = 24, color = "rgba(255,255,255,0.9)", className = "
 function PhotoOverlay({ selectedFrame }: { selectedFrame: typeof FRAMES[0] }) {
   return (
     <div className="absolute inset-0 pointer-events-none z-20" id="photo-overlay">
-      {/* Top banner */}
       <div 
         className="absolute top-0 left-0 right-0 px-3 pt-3 pb-8"
         style={{ background: `linear-gradient(to bottom, rgba(${selectedFrame.rgb},0.85), transparent)` }}
@@ -41,19 +40,16 @@ function PhotoOverlay({ selectedFrame }: { selectedFrame: typeof FRAMES[0] }) {
         </p>
       </div>
 
-      {/* Decorative Corners */}
       <div className="absolute inset-2 border-2 border-dashed opacity-50" style={{ borderColor: selectedFrame.color }} />
       <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 m-3" style={{ borderColor: selectedFrame.color }} />
       <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 m-3" style={{ borderColor: selectedFrame.color }} />
       <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 m-3" style={{ borderColor: selectedFrame.color }} />
       <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 m-3" style={{ borderColor: selectedFrame.color }} />
 
-      {/* All Members Photo */}
       <div className="absolute bottom-[2.5rem] right-3 flex justify-end drop-shadow-xl z-30">
         <img src="/allmembers.png" alt="Treasure Members" className="w-[45%] object-contain opacity-95" crossOrigin="anonymous" />
       </div>
 
-      {/* Bottom banner */}
       <div 
         className="absolute bottom-0 left-0 right-0 px-3 pb-3 pt-12"
         style={{ background: `linear-gradient(to top, rgba(${selectedFrame.rgb},0.95), transparent)` }}
@@ -81,14 +77,16 @@ export default function PhotoboothPage() {
 
   const handleCapture = useCallback(async () => {
     if (!webcamRef.current || isCapturing) return;
+
+    // AMBIL LANGSUNG DARI ELEMENT VIDEO MENTAH! (Mencegah kompresi dari react-webcam)
+    const video = webcamRef.current.video;
+    if (!video || video.readyState !== 4) return;
+
     setIsCapturing(true);
     setFlash(true);
     setTimeout(() => setFlash(false), 300);
 
     try {
-      const webcamScreenshot = webcamRef.current.getScreenshot({ width: 720, height: 960 });
-      if (!webcamScreenshot) throw new Error("Could not capture webcam frame");
-
       const container = containerRef.current;
       if (!container) throw new Error("No container ref");
       const { width: cW, height: cH } = container.getBoundingClientRect();
@@ -102,30 +100,30 @@ export default function PhotoboothPage() {
       const scaleX = outputW / cW;
       const scaleY = outputH / cH;
 
-      const webcamImg = new Image();
-      await new Promise<void>((res) => { webcamImg.onload = () => res(); webcamImg.src = webcamScreenshot; });
-      
       // ========================================================
-      // FIX ASPECT RATIO (Tidak Ter-press) & FIX MIRRORING
+      // MATEMATIKA ANTI-GEPENG MENGGUNAKAN RAW VIDEO
       // ========================================================
-      const imgRatio = webcamImg.width / webcamImg.height;
+      const videoW = video.videoWidth;
+      const videoH = video.videoHeight;
+      const imgRatio = videoW / videoH;
       const canvasRatio = outputW / outputH;
-      let sX = 0, sY = 0, sW = webcamImg.width, sH = webcamImg.height;
+      let sX = 0, sY = 0, sW = videoW, sH = videoH;
 
       if (imgRatio > canvasRatio) {
-        // Gambar webcam lebih lebar (contoh: 16:9), potong kiri-kanan
-        sW = webcamImg.height * canvasRatio;
-        sX = (webcamImg.width - sW) / 2;
+        // Kamera terlalu lebar (contoh: 16:9), potong samping kiri & kanan
+        sW = videoH * canvasRatio;
+        sX = (videoW - sW) / 2;
       } else {
-        // Gambar webcam lebih tinggi, potong atas-bawah
-        sH = webcamImg.width / canvasRatio;
-        sY = (webcamImg.height - sH) / 2;
+        // Kamera terlalu tinggi, potong atas & bawah
+        sH = videoW / canvasRatio;
+        sY = (videoH - sH) / 2;
       }
 
       ctx.save();
-      // TANPA ctx.scale(-1, 1). Screenshot bawaan sudah un-mirrored (teks terbaca normal)
-      // Menggambar bagian yang sudah di-crop agar proporsional (object-fit cover)
-      ctx.drawImage(webcamImg, sX, sY, sW, sH, 0, 0, outputW, outputH);
+      // Gambar video mentah yang sudah dipotong. 
+      // Video mentah SECARA ALAMI tidak termirror (seperti dilihat orang lain), 
+      // jadi teks akan terbaca normal tanpa perlu rumus ctx.scale(-1, 1).
+      ctx.drawImage(video, sX, sY, sW, sH, 0, 0, outputW, outputH);
       ctx.restore();
       // ========================================================
 
@@ -227,7 +225,7 @@ export default function PhotoboothPage() {
           </div>
         </motion.div>
 
-        <motion.div ref={containerRef} className="relative w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200" style={{ aspectRatio: "3/4" }}>
+        <motion.div ref={containerRef} className="relative w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-slate-100" style={{ aspectRatio: "3/4" }}>
           <AnimatePresence>
             {flash && <motion.div className="absolute inset-0 bg-white z-50" initial={{ opacity: 1 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} />}
           </AnimatePresence>
@@ -245,7 +243,14 @@ export default function PhotoboothPage() {
                 />
               ) : (
                 <motion.div key="webcam" className="w-full h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Webcam ref={webcamRef} audio={false} screenshotFormat="image/jpeg" videoConstraints={videoConstraints} onUserMediaError={() => setCameraError(true)} className="w-full h-full object-cover" mirrored={true} />
+                  <Webcam 
+                    ref={webcamRef} 
+                    audio={false} 
+                    videoConstraints={videoConstraints} 
+                    onUserMediaError={() => setCameraError(true)} 
+                    className="w-full h-full object-cover" 
+                    mirrored={true} 
+                  />
                   <PhotoOverlay selectedFrame={selectedFrame} />
                 </motion.div>
               )}
@@ -271,7 +276,7 @@ export default function PhotoboothPage() {
                   link.download = `teume-bday-${Date.now()}.jpg`;
                   link.click();
                 }} className="flex-1 flex justify-center items-center gap-2 bg-slate-800 text-white font-cute font-bold py-4 rounded-2xl shadow-md active:scale-95 transition-transform">
-                  <Download size={20} /> Save 💾
+                  <Download size={20} /> Save Photo 💾
                 </button>
               </motion.div>
             ) : (
