@@ -4,9 +4,8 @@ import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Webcam from "react-webcam";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Download, Mail, ChevronLeft, Sparkles } from "lucide-react";
+import { Camera, Download, Mail, ChevronLeft, X } from "lucide-react";
 
-// Thematic frames instead of members
 const FRAMES = [
   { id: "diamond", name: "💎 Diamond Blue", color: "#38bdf8", rgb: "14,165,233" },
   { id: "blush", name: "🌸 Blossom Pink", color: "#fb7185", rgb: "244,63,94" },
@@ -22,11 +21,10 @@ function DiamondIcon({ size = 24, color = "rgba(255,255,255,0.9)", className = "
   );
 }
 
-// Overlay with Dynamic Theme
 function PhotoOverlay({ selectedFrame }: { selectedFrame: typeof FRAMES[0] }) {
   return (
     <div className="absolute inset-0 pointer-events-none z-20" id="photo-overlay">
-      {/* Top banner gradient */}
+      {/* Top banner */}
       <div 
         className="absolute top-0 left-0 right-0 px-3 pt-3 pb-8"
         style={{ background: `linear-gradient(to bottom, rgba(${selectedFrame.rgb},0.85), transparent)` }}
@@ -51,17 +49,17 @@ function PhotoOverlay({ selectedFrame }: { selectedFrame: typeof FRAMES[0] }) {
       <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 m-3" style={{ borderColor: selectedFrame.color }} />
 
       {/* All Members Photo */}
-      <div className="absolute bottom-[4.5rem] left-0 right-0 flex justify-center drop-shadow-xl">
-        <img src="/allmembers.png" alt="Treasure Members" className="w-[85%] object-contain" crossOrigin="anonymous" />
+      <div className="absolute bottom-[2.5rem] right-3 flex justify-end drop-shadow-xl z-30">
+        <img src="/allmembers.png" alt="Treasure Members" className="w-[45%] object-contain opacity-95" crossOrigin="anonymous" />
       </div>
 
-      {/* Bottom banner gradient */}
+      {/* Bottom banner */}
       <div 
-        className="absolute bottom-0 left-0 right-0 px-3 pb-3 pt-8"
-        style={{ background: `linear-gradient(to top, rgba(${selectedFrame.rgb},0.9), transparent)` }}
+        className="absolute bottom-0 left-0 right-0 px-3 pb-3 pt-12"
+        style={{ background: `linear-gradient(to top, rgba(${selectedFrame.rgb},0.95), transparent)` }}
       >
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <p className="font-cute text-white text-xs font-bold tracking-[0.3em]">TREASURE • 트레저</p>
+        <div className="flex items-center justify-center gap-2 mt-1">
+          <p className="font-cute text-white text-[10px] font-bold tracking-[0.3em]">TREASURE • 트레저</p>
         </div>
       </div>
     </div>
@@ -104,23 +102,41 @@ export default function PhotoboothPage() {
       const scaleX = outputW / cW;
       const scaleY = outputH / cH;
 
-      // 1. Draw Webcam
       const webcamImg = new Image();
       await new Promise<void>((res) => { webcamImg.onload = () => res(); webcamImg.src = webcamScreenshot; });
-      ctx.save();
-      ctx.translate(outputW, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(webcamImg, 0, 0, outputW, outputH);
-      ctx.restore();
+      
+      // ========================================================
+      // FIX ASPECT RATIO (Tidak Ter-press) & FIX MIRRORING
+      // ========================================================
+      const imgRatio = webcamImg.width / webcamImg.height;
+      const canvasRatio = outputW / outputH;
+      let sX = 0, sY = 0, sW = webcamImg.width, sH = webcamImg.height;
 
-      // 2. Draw Top Gradient
+      if (imgRatio > canvasRatio) {
+        // Gambar webcam lebih lebar (contoh: 16:9), potong kiri-kanan
+        sW = webcamImg.height * canvasRatio;
+        sX = (webcamImg.width - sW) / 2;
+      } else {
+        // Gambar webcam lebih tinggi, potong atas-bawah
+        sH = webcamImg.width / canvasRatio;
+        sY = (webcamImg.height - sH) / 2;
+      }
+
+      ctx.save();
+      // TANPA ctx.scale(-1, 1). Screenshot bawaan sudah un-mirrored (teks terbaca normal)
+      // Menggambar bagian yang sudah di-crop agar proporsional (object-fit cover)
+      ctx.drawImage(webcamImg, sX, sY, sW, sH, 0, 0, outputW, outputH);
+      ctx.restore();
+      // ========================================================
+
+      // Top Gradient
       const topGrad = ctx.createLinearGradient(0, 0, 0, outputH * 0.15);
       topGrad.addColorStop(0, `rgba(${selectedFrame.rgb},0.85)`);
       topGrad.addColorStop(1, `rgba(${selectedFrame.rgb},0)`);
       ctx.fillStyle = topGrad;
       ctx.fillRect(0, 0, outputW, outputH * 0.15);
 
-      // 3. Draw Top Text
+      // Top Text
       ctx.textAlign = "center";
       ctx.fillStyle = "white";
       ctx.font = `bold ${16 * scaleX}px 'Nunito', sans-serif`;
@@ -128,51 +144,45 @@ export default function PhotoboothPage() {
       ctx.font = `italic ${24 * scaleX}px 'Playfair Display', serif`;
       ctx.fillText("Happy Birthday, Anggie! 🤍", outputW / 2, 60 * scaleY);
 
-      // 4. Draw Inner Dashed Border
+      // Borders & Corners
       ctx.strokeStyle = selectedFrame.color;
       ctx.lineWidth = 3;
       ctx.setLineDash([10, 10]);
       const margin = 10 * scaleX;
       ctx.strokeRect(margin, margin, outputW - (margin*2), outputH - (margin*2));
-      ctx.setLineDash([]); // reset
-
-      // 5. Draw Solid Corners
+      ctx.setLineDash([]);
       const cornerLen = 30 * scaleX;
       ctx.lineWidth = 6;
       const m = margin + 4;
-      // TL
       ctx.beginPath(); ctx.moveTo(m, m + cornerLen); ctx.lineTo(m, m); ctx.lineTo(m + cornerLen, m); ctx.stroke();
-      // TR
       ctx.beginPath(); ctx.moveTo(outputW - m - cornerLen, m); ctx.lineTo(outputW - m, m); ctx.lineTo(outputW - m, m + cornerLen); ctx.stroke();
-      // BL
       ctx.beginPath(); ctx.moveTo(m, outputH - m - cornerLen); ctx.lineTo(m, outputH - m); ctx.lineTo(m + cornerLen, outputH - m); ctx.stroke();
-      // BR
       ctx.beginPath(); ctx.moveTo(outputW - m - cornerLen, outputH - m); ctx.lineTo(outputW - m, outputH - m); ctx.lineTo(outputW - m, outputH - m - cornerLen); ctx.stroke();
 
-      // 6. Draw All Members Photo
+      // DRAW ALL MEMBERS
       const allMemImg = new Image();
       allMemImg.crossOrigin = "anonymous";
       await new Promise<void>((res) => { allMemImg.onload = () => res(); allMemImg.onerror = () => res(); allMemImg.src = "/allmembers.png"; });
       
       if (allMemImg.width > 0) {
-        const imgW = outputW * 0.85;
+        const imgW = outputW * 0.45; 
         const imgH = imgW * (allMemImg.height / allMemImg.width);
-        const imgX = (outputW - imgW) / 2;
-        const imgY = outputH - imgH - (70 * scaleY); // Just above bottom text
+        const imgX = outputW - imgW - (15 * scaleX); 
+        const imgY = outputH - imgH - (40 * scaleY); 
         ctx.drawImage(allMemImg, imgX, imgY, imgW, imgH);
       }
 
-      // 7. Draw Bottom Gradient
+      // Bottom Gradient
       const botGrad = ctx.createLinearGradient(0, outputH * 0.85, 0, outputH);
       botGrad.addColorStop(0, `rgba(${selectedFrame.rgb},0)`);
-      botGrad.addColorStop(1, `rgba(${selectedFrame.rgb},0.9)`);
+      botGrad.addColorStop(1, `rgba(${selectedFrame.rgb},0.95)`);
       ctx.fillStyle = botGrad;
       ctx.fillRect(0, outputH * 0.85, outputW, outputH * 0.15);
 
-      // 8. Draw Bottom Text
+      // Bottom Text
       ctx.fillStyle = "white";
-      ctx.font = `bold ${18 * scaleX}px 'Nunito', sans-serif`;
-      ctx.fillText("TREASURE • 트레저", outputW / 2, outputH - 25 * scaleY);
+      ctx.font = `bold ${14 * scaleX}px 'Nunito', sans-serif`;
+      ctx.fillText("TREASURE • 트레저", outputW / 2, outputH - 20 * scaleY);
 
       setCapturedImage(canvas.toDataURL("image/jpeg", 0.95));
     } catch (err) {
@@ -181,6 +191,10 @@ export default function PhotoboothPage() {
       setIsCapturing(false);
     }
   }, [isCapturing, selectedFrame]);
+
+  const handleRetake = () => {
+    setCapturedImage(null);
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-sky-50 via-[#fffbf5] to-blue-50 flex flex-col">
@@ -192,7 +206,6 @@ export default function PhotoboothPage() {
 
       <div className="flex-1 flex flex-col items-center gap-5 px-4 pb-6 max-w-lg mx-auto w-full">
         
-        {/* Frame Theme Selector */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full">
           <p className="font-cute text-slate-500 text-xs font-bold tracking-widest text-center mb-2 uppercase">Pick a Frame Theme</p>
           <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 px-1">
@@ -214,46 +227,62 @@ export default function PhotoboothPage() {
           </div>
         </motion.div>
 
-        {/* Camera Container */}
         <motion.div ref={containerRef} className="relative w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200" style={{ aspectRatio: "3/4" }}>
           <AnimatePresence>
-            {flash && <motion.div className="absolute inset-0 bg-white z-30" initial={{ opacity: 1 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} />}
+            {flash && <motion.div className="absolute inset-0 bg-white z-50" initial={{ opacity: 1 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} />}
           </AnimatePresence>
 
           {!cameraError ? (
-            <Webcam ref={webcamRef} audio={false} screenshotFormat="image/jpeg" videoConstraints={videoConstraints} onUserMediaError={() => setCameraError(true)} className="w-full h-full object-cover" mirrored={true} />
+            <AnimatePresence mode="wait">
+              {capturedImage ? (
+                <motion.img 
+                  key="preview"
+                  src={capturedImage} 
+                  className="w-full h-full object-cover"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                />
+              ) : (
+                <motion.div key="webcam" className="w-full h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <Webcam ref={webcamRef} audio={false} screenshotFormat="image/jpeg" videoConstraints={videoConstraints} onUserMediaError={() => setCameraError(true)} className="w-full h-full object-cover" mirrored={true} />
+                  <PhotoOverlay selectedFrame={selectedFrame} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           ) : (
             <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center">
               <Camera size={40} className="text-slate-300 mb-2" />
               <p className="text-slate-400 text-sm font-cute">Camera access needed</p>
             </div>
           )}
-          <PhotoOverlay selectedFrame={selectedFrame} />
         </motion.div>
 
-        {/* Result & Actions */}
         <div className="w-full flex flex-col gap-3">
-          <button onClick={handleCapture} disabled={isCapturing} className="w-full flex justify-center items-center gap-2 bg-slate-800 text-white font-cute font-bold py-4 rounded-2xl shadow-md active:scale-95 transition-transform">
-            <Camera size={20} /> {isCapturing ? "Say Cheese!..." : "Snap Photo"}
-          </button>
-
-          <AnimatePresence>
-            {capturedImage && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="flex flex-col gap-3">
+          <AnimatePresence mode="wait">
+            {capturedImage ? (
+              <motion.div key="preview-btns" className="flex gap-2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <button onClick={handleRetake} className="flex-1 flex justify-center items-center gap-2 bg-slate-200 text-slate-700 font-cute font-bold py-4 rounded-2xl active:scale-95 transition-transform">
+                  <X size={20} /> Retake
+                </button>
                 <button onClick={() => {
                   const link = document.createElement("a");
                   link.href = capturedImage;
                   link.download = `teume-bday-${Date.now()}.jpg`;
                   link.click();
-                }} className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-diamond-400 to-diamond-500 text-white font-cute font-bold py-4 rounded-2xl shadow-md active:scale-95 transition-transform">
-                  <Download size={20} /> Download Photo 💾
+                }} className="flex-1 flex justify-center items-center gap-2 bg-slate-800 text-white font-cute font-bold py-4 rounded-2xl shadow-md active:scale-95 transition-transform">
+                  <Download size={20} /> Save 💾
                 </button>
               </motion.div>
+            ) : (
+              <motion.button key="snap-btn" onClick={handleCapture} disabled={isCapturing} className="w-full flex justify-center items-center gap-2 bg-slate-800 text-white font-cute font-bold py-4 rounded-2xl shadow-md active:scale-95 transition-transform" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <Camera size={20} /> {isCapturing ? "Capturing..." : "Snap Photo"}
+              </motion.button>
             )}
           </AnimatePresence>
 
-          <button onClick={() => router.push("/letter")} className="w-full flex justify-center items-center gap-2 bg-white border-2 border-slate-200 text-slate-700 font-cute font-bold py-4 rounded-2xl shadow-sm active:scale-95 transition-transform">
-            <Mail size={20} /> Read Your Letter 💌
+          <button onClick={() => router.push("/letter")} className="w-full flex justify-center items-center gap-2 bg-white border-2 border-slate-100 text-slate-500 font-cute font-bold py-4 rounded-2xl active:scale-95 transition-transform text-sm">
+            <Mail size={18} /> Read Your Letter 💌
           </button>
         </div>
       </div>
