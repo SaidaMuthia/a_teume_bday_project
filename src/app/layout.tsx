@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Happy Birthday Anggie! 💎",
-  description: "A special birthday treasure for the best Teume, Anggie!",
+  description: "A special birthday treasure for Anggie!",
 };
 
 export default function RootLayout({
